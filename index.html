@@ -7,6 +7,7 @@
 <script type='text/javascript' src='mootools-core.js'></script>
 <script type='text/javascript' src='jDataView.js'></script>
 <script type='text/javascript' src='terminal.js'></script>
+<script type='text/javascript' src='speaker.js'></script>
 <script type='text/javascript' src='zzt.js'></script>
 <script type="text/javascript">
 
@@ -14,36 +15,6 @@ var world = null;
 var terminal = null;
 var curBoard = 0;
 var maxBoards = 0;
-
-var beep = function(duration, type, finishedCallback) {
-
-    if (!(window.audioContext || window.webkitAudioContext)) {
-        throw Error("Your browser does not support Audio Context.");
-    }
-
-    duration = +duration;
-
-    // Only 0-4 are valid types.
-    type = (type % 5) || 0;
-
-    if (typeof finishedCallback != "function") {
-        finishedCallback = function() {};   
-    }
-
-    var ctx = new (window.audioContext || window.webkitAudioContext);
-    var osc = ctx.createOscillator();
-
-    osc.type = type;
-
-    osc.connect(ctx.destination);
-    osc.noteOn(0);
-
-    setTimeout(function() {
-        osc.noteOff(0);
-        finishedCallback();
-    }, duration);
-
-};
 
 window.addEvent('domready', function(e) {
     $$('input#loadButton').each(function(button) {
@@ -75,15 +46,55 @@ window.addEvent('domready', function(e) {
     terminal.setupTerminal();
     terminal.clear();
     
+    if ( !window.requestAnimationFrame ) {
+        window.requestAnimationFrame = ( function() {
+     
+            return window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame ||
+            window.oRequestAnimationFrame ||
+            window.msRequestAnimationFrame ||
+            function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
+     
+                window.setTimeout( callback, 1000 / 60 );
+     
+            };
+     
+        } )();
+    }
     //beep(0, 500);
 });
+
+function animLoop( render, element ) {
+    var running, lastFrame = +new Date;
+    var frame = 0;
+    var nextPoint = 0;
+    var pointDuration = 60;
+    
+    function loop( now ) {
+        // stop the loop if render returned false
+        if ( running !== false ) {
+            requestAnimationFrame( loop, element );
+            var deltaT = now - lastFrame;
+            // do not render frame when deltaT is too high
+            // skip a few frames, give deltaT a moment to smooth out
+            if (frame > 5) {
+                if ( deltaT < 160 ) {
+                    running = render( deltaT );
+                }
+            }
+            lastFrame = now;
+            frame++;
+        }
+    }
+    loop( lastFrame );
+}
 
 function load(name) {
     var xhr = new XMLHttpRequest();
     xhr.overrideMimeType("text/plain; charset=x-user-defined");
         
     xhr.onload = function(e) {
-        console.log('loading world');
+        //console.log('loading world');
         var arraybuffer = xhr.response;
         if (arraybuffer) {
             var data = new jDataView(arraybuffer,0,arraybuffer.length,true); // we need to parse 16/32 bit values as little endian

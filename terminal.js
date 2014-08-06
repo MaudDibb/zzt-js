@@ -11,6 +11,8 @@ var Terminal = function() {
     var termWidth = 60;
     var termHeight = 25;
     var term = this;
+    var blinking = {};
+    var blinkTimer = null;
     
     this.setupTerminal = function() {
         canvas = document.getElementById('canvas');
@@ -42,6 +44,9 @@ var Terminal = function() {
             glyphLutX[ch] = px;
             glyphLutY[ch] = py;
         }
+        
+        var term = this;
+        setInterval(function() { term.blink() }, 1000/1.8); // vga blink rate is roughly 1.8 blinks per second
             
     }
     
@@ -65,7 +70,29 @@ var Terminal = function() {
         var px = x * 9;
         var py = y << 4;
         
-        ctx.drawImage(fontimg, colorLutX[bg] + glyphLutX[219], colorLutY[bg] + glyphLutY[219], 9, 16, px, py, 9, 16);
+        ctx.drawImage(fontimg, colorLutX[bg & 7] + glyphLutX[219], colorLutY[bg & 7] + glyphLutY[219], 9, 16, px, py, 9, 16);
         ctx.drawImage(fontimg, colorLutX[fg] + glyphLutX[ch],  colorLutY[fg] + glyphLutY[ch],  9, 16, px, py, 9, 16);
+    }
+    
+    var blinkstate = false;
+    this.blink = function() {
+        var n = 0;
+        for (var y=0; y<termHeight; y++) {
+            for (var x=0; x<termWidth; x++,n++) {
+                
+                if (termdata[n].bg & 8) {
+                    var px = x * 9,
+                        py = y << 4,
+                        bg = termdata[n].bg,
+                        ch = termdata[n].ch,
+                        fg = termdata[n].fg;
+                    
+                    ctx.drawImage(fontimg, colorLutX[bg & 7] + glyphLutX[219], colorLutY[bg & 7] + glyphLutY[219], 9, 16, px, py, 9, 16);
+                    if (blinkstate) 
+                        ctx.drawImage(fontimg, colorLutX[fg] + glyphLutX[ch],  colorLutY[fg] + glyphLutY[ch],  9, 16, px, py, 9, 16);
+                }
+            }
+        }
+        blinkstate = !blinkstate;
     }
 }   
