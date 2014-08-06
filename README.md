@@ -8,7 +8,6 @@ can load zzt files directly off the web via ajax request and display the boards.
 
 todo:
 
-get the blinking attribute going<br>
 start animating things like pushers, transporters, spinning guns, etc<br>
 ai for the monsters<br>
 hiding the player on the title screens<br>
