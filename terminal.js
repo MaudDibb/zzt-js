@@ -74,6 +74,11 @@ var Terminal = function() {
         ctx.drawImage(fontimg, colorLutX[fg] + glyphLutX[ch],  colorLutY[fg] + glyphLutY[ch],  9, 16, px, py, 9, 16);
     }
     
+    this.getCharacterAt = function(x, y) {
+        var offset = x + yLut[y];
+        return {code: termdata[offset].ch, color: termdata[offset].fg | (termdata[offset].bg << 4) };
+    };
+    
     var blinkstate = false;
     this.blink = function() {
         var n = 0;

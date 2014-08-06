@@ -117,6 +117,30 @@ function load(name) {
 
 <body style='background:#222'>
     <div style='position:absolute;margin:auto;width:540px;height:400px;left:0;top:0;bottom:0;right:0'>
+        <div style='float:right;margin-right:-160px;width:150px;font:10px verdana;color:#fa0'>
+            <div style='float:left'>
+                <div>Ammo:</div>
+                <div>Gems:</div>
+                <div>Health:</div>
+                <div>Torches:</div>
+                <div>Keys:</div>
+            </div>
+            <div style='float:right;text-align:right'>
+                <div id='ammo'></div>
+                <div id='gems'></div>
+                <div id='health'></div>
+                <div id='torches'></div>
+                <div id='keys'>
+                    <div style='float:left;color:#00f;font-weight:bold'>&#9792;</div>
+                    <div style='float:left;color:#0f0;font-weight:bold'>&#9792;</div>
+                    <div style='float:left;color:#0ff;font-weight:bold'>&#9792;</div>
+                    <div style='float:left;color:#f00;font-weight:bold'>&#9792;</div>
+                    <div style='float:left;color:#f0f;font-weight:bold'>&#9792;</div>
+                    <div style='float:left;color:#ff0;font-weight:bold'>&#9792;</div>
+                    <div style='float:left;color:#fff;font-weight:bold'>&#9792;</div>
+                </div>
+            </div>
+        </div>
         <canvas style='background:#000' id='canvas' width='540' height='400'>
             if you can see this...get a better browser
         </canvas>
@@ -124,6 +148,7 @@ function load(name) {
             <input type='button' id='prevButton' value='previous board'>
             <input type='button' id='nextButton' value='next board'>
         </div>
+        
     </div>
     <input type='button' id='loadButton' value='TOWN.ZZT'>
     <input type='button' id='loadButton' value='CAVES.ZZT'>

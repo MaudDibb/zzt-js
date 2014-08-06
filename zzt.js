@@ -1,3 +1,8 @@
+function randomIntFromInterval(min,max)
+{
+    return Math.floor(Math.random()*(max-min+1)+min);
+}
+
 function parseTiles(data) {
     var tileData = [];
     var n = 0;
@@ -74,6 +79,73 @@ var ZZTBoard = function(data) {
         var pos = ox + (oy * 60);
         return this.objectMap[pos];
     };
+    
+    this.update = function() {
+        for (var n=0; n<this.numObjects; n++) {
+            var obj = this.objects[n];
+            var termX = obj.x - 1;
+            var termY = obj.y - 1;
+            var pos = termX + termY * 60;
+            var tile = this.tiles[pos].code;
+            
+            switch (tile) {
+                case 0x1e:  obj.p3++;
+                            if (obj.p3 > obj.cycle) {
+                                obj.p3 = 0;
+                                obj.p1 = (obj.p1 + 1) & 3;
+                                var el = terminal.getCharacterAt(termX, termY);
+                                if (obj.xStep < 0) {
+                                    switch (obj.p1) {
+                                        case 0: el.code = 0x3c; break;
+                                        case 1: el.code = 0x28; break;
+                                        case 2: el.code = 0xb3; break;
+                                        case 3: el.code = 0x28; break;
+                                    }
+                                }
+                                if (obj.xStep > 0) {
+                                    switch (obj.p1) {
+                                        case 0: el.code = 0x3e; break;
+                                        case 1: el.code = 0x29; break;
+                                        case 2: el.code = 0xb3; break;
+                                        case 3: el.code = 0x29; break;
+                                    }
+                                }
+                                if (obj.yStep < 0) {
+                                    switch (obj.p1) {
+                                        case 0: el.code = 0x5e; break;
+                                        case 1: el.code = 0x7e; break;
+                                        case 2: el.code = 0x2d; break;
+                                        case 3: el.code = 0x7e; break;
+                                    }
+                                }
+                                if (obj.yStep > 0) {
+                                    switch (obj.p1) {
+                                        case 0: el.code = 0x76; break;
+                                        case 1: el.code = 0x7e; break;
+                                        case 2: el.code = 0x2d; break;
+                                        case 3: el.code = 0x7e; break;
+                                    }
+                                }
+                                terminal.drawCharacter(termX, termY, el.code, el.color);
+                            }
+                            break;
+                                    
+                case 0x27:  obj.p3++;
+                            if (obj.p3 > obj.cycle) {
+                                obj.p3 = 0;
+                                var el = terminal.getCharacterAt(termX, termY);
+                                switch (el.code) {
+                                    case 0x18: el.code = 0x1a; break;
+                                    case 0x1a: el.code = 0x19; break;
+                                    case 0x19: el.code = 0x1b; break;
+                                    case 0x1b: el.code = 0x18; break;
+                                }
+                                terminal.drawCharacter(termX, termY, el.code, el.color);
+                            }
+                            break;
+            }
+        }
+    };
 }
 
 var keyColors = {
@@ -87,6 +159,7 @@ var keyColors = {
 };
     
 var ZZTWorld = function(data) {
+    this.gameTimer = null;
     this.numBoards = data.getInt16() + 1; // title screen not included in board count
     this.ammo = data.getInt16();
     this.gems = data.getInt16();
@@ -131,6 +204,24 @@ var ZZTWorld = function(data) {
     
     curBoard = 0;
     maxBoards = this.numBoards;
+    
+    $('ammo').innerHTML = this.ammo;
+    $('gems').innerHTML = this.gems;
+    $('health').innerHTML = this.health;
+    $('torches').innerHTML = this.torches;
+    
+    var game = this;
+    this.gametimer = setInterval(function() {
+        game.update();
+    }, 1000/18.2);
+    
+    this.update = function() {
+        this.boards[curBoard].update();
+    }
+    
+    this.stopGame = function() {
+        clearInterval(this.gametimer);
+    }
 }    
 
 function zztElement(x,y,board) {
@@ -141,6 +232,8 @@ function zztElement(x,y,board) {
     switch (code) {
         case 0x00:  code = 0x00; color = 0; break;
         case 0x01:  code = 0x00; break; // edge of board
+        case 0x02:  code = 0x00; break; // messenger
+        case 0x03:  code = 0x00; break; // monitor
         case 0x04:  code = 0x02; break; // player
         case 0x05:  code = 0x84; break; // ammo
         case 0x06:  code = 0x9d; break; // torch
@@ -213,7 +306,12 @@ function zztElement(x,y,board) {
                     break;
         case 0x25: code = 0x2a; break; // slime
         case 0x26: code = 0x5e; break; // shark
-        case 0x27: code = 0x18;  break; // spinning gun
+        case 0x27:  switch (randomIntFromInterval(0,3)) { // spinning gun
+                        case 0: code = 0x18; break; 
+                        case 1: code = 0x19; break;
+                        case 2: code = 0x1a; break;
+                        case 3: code = 0x1b; break;
+                    }
         case 0x28:  var obj = board.getObjectAt(x+1, y+1);
                     if (obj.xStep < 0) {
                         code = 0x11;
@@ -237,7 +335,6 @@ function zztElement(x,y,board) {
         case 0x33: code = color; color = 0x5f; break;   // purple bg text
         case 0x34: code = color; color = 0x6f; break;   // yellow bg text
         case 0x35: code = color; color = 0x0f; break;   // white text, black bg
-        case 0x36: code = color; color = 0xf9; break;
     }
     return {code:code,color:color};
 }
