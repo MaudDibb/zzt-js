@@ -6,6 +6,9 @@ zzt on the web!
 not very functional right now, its just a zzt file viewer at this point. but the cool part is it 
 can load zzt files directly off the web via ajax request and display the boards. 
 
+terminal emulation of blink attributes working!<br>
+spinning guns and duplicators animated!<br>
+
 todo:
 
 start animating things like pushers, transporters, spinning guns, etc<br>
