@@ -11,6 +11,43 @@
 <script type='text/javascript' src='zzt.js'></script>
 <script type="text/javascript">
 
+/* something for when the page loses focus 
+(function() {
+    var hidden = "hidden";
+
+    // Standards:
+    if (hidden in document)
+        document.addEventListener("visibilitychange", onchange);
+    else if ((hidden = "mozHidden") in document)
+        document.addEventListener("mozvisibilitychange", onchange);
+    else if ((hidden = "webkitHidden") in document)
+        document.addEventListener("webkitvisibilitychange", onchange);
+    else if ((hidden = "msHidden") in document)
+        document.addEventListener("msvisibilitychange", onchange);
+    // IE 9 and lower:
+    else if ('onfocusin' in document)
+        document.onfocusin = document.onfocusout = onchange;
+    // All others:
+    else
+        window.onpageshow = window.onpagehide 
+            = window.onfocus = window.onblur = onchange;
+
+    function onchange (evt) {
+        var v = 'visible', h = 'hidden',
+            evtMap = { 
+                focus:v, focusin:v, pageshow:v, blur:h, focusout:h, pagehide:h 
+            };
+
+        evt = evt || window.event;
+        if (evt.type in evtMap)
+            document.body.className = evtMap[evt.type];
+        else        
+            document.body.className = this[hidden] ? "hidden" : "visible";
+    }
+    // set the initial state
+    onchange({type:(document.visibilityState == "visible") ? "focus" : "blur"})        
+})(); */
+
 var world = null;
 var terminal = null;
 var curBoard = 0;
@@ -20,6 +57,11 @@ window.addEvent('domready', function(e) {
     $$('input#loadButton').each(function(button) {
         button.addEvent('click', function(e) {
             var name = button.value;
+            if (world) {
+                world.stopGame();
+                world = null;
+            }
+            terminal.clear();
             load(name);
         });
     });
@@ -28,6 +70,7 @@ window.addEvent('domready', function(e) {
         if (world) {
             if (curBoard > 0) {
                 curBoard--;
+                
                 world.showBoard(curBoard);
             }
         }
@@ -40,6 +83,18 @@ window.addEvent('domready', function(e) {
                 world.showBoard(curBoard);
             }
         }
+    });
+    
+    $('stopButton').addEvent('click', function() {
+        if (world) {
+            world.stopGame();
+        }
+    });
+    
+    $('canvas').addEvent('mousemove', function(e) {
+        var x = Math.floor(e.event.offsetX / 9) + 1,
+            y = Math.floor(e.event.offsetY / 16) + 1;
+        $('mouse').innerHTML = x + ', ' + y;
     });
     
     terminal = new Terminal();
@@ -95,6 +150,7 @@ function load(name) {
         
     xhr.onload = function(e) {
         //console.log('loading world');
+        if (world) world = null;
         var arraybuffer = xhr.response;
         if (arraybuffer) {
             var data = new jDataView(arraybuffer,0,arraybuffer.length,true); // we need to parse 16/32 bit values as little endian
@@ -124,6 +180,7 @@ function load(name) {
                 <div>Health:</div>
                 <div>Torches:</div>
                 <div>Keys:</div>
+                <div>Mouse:</div>
             </div>
             <div style='float:right;text-align:right'>
                 <div id='ammo'></div>
@@ -139,6 +196,7 @@ function load(name) {
                     <div style='float:left;color:#ff0;font-weight:bold'>&#9792;</div>
                     <div style='float:left;color:#fff;font-weight:bold'>&#9792;</div>
                 </div>
+                <div id='mouse'></div>
             </div>
         </div>
         <canvas style='background:#000' id='canvas' width='540' height='400'>
@@ -147,8 +205,8 @@ function load(name) {
         <div style='margin-top:10px;text-align:center'>
             <input type='button' id='prevButton' value='previous board'>
             <input type='button' id='nextButton' value='next board'>
+            <input type='button' id='stopButton' value='stop'>
         </div>
-        
     </div>
     <input type='button' id='loadButton' value='TOWN.ZZT'>
     <input type='button' id='loadButton' value='CAVES.ZZT'>
