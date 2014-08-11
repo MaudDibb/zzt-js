@@ -18,7 +18,7 @@ var Terminal = function() {
         canvas = document.getElementById('canvas');
         ctx = canvas.getContext('2d');
         fontimg = new Image();
-        fontimg.src = 'font.png';
+        fontimg.src = 'images/font.png';
         fontimg.onload = function() {
             fontloaded = true;
         }
