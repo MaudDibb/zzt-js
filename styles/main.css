@@ -1,0 +1,22 @@
+body, html {
+    background: #222;
+}
+
+.centered {
+    position:absolute;
+    margin:auto;
+    width:540px;
+    height:400px;
+    left:0;
+    top:0;
+    bottom:0;
+    right:0;
+}
+
+.status {
+    float:right;
+    margin-right:-160px;
+    width:150px;
+    font:10px verdana;
+    color:#fa0;
+}

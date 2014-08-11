@@ -1,9 +1,10 @@
-
+<!DOCTYPE html>
 <html>
 
 <head>
 <title>ZZT</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<link rel='stylesheet' type='text/css' href='styles/main.css'>
 <script type='text/javascript' src='scripts/mootools-core.js'></script>
 <script type='text/javascript' src='scripts/jDataView.js'></script>
 <script type='text/javascript' src='scripts/terminal.js'></script>
@@ -101,55 +102,13 @@ window.addEvent('domready', function(e) {
     terminal.setupTerminal();
     terminal.clear();
     
-    if ( !window.requestAnimationFrame ) {
-        window.requestAnimationFrame = ( function() {
-     
-            return window.webkitRequestAnimationFrame ||
-            window.mozRequestAnimationFrame ||
-            window.oRequestAnimationFrame ||
-            window.msRequestAnimationFrame ||
-            function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
-     
-                window.setTimeout( callback, 1000 / 60 );
-     
-            };
-     
-        } )();
-    }
-    //beep(0, 500);
 });
-
-function animLoop( render, element ) {
-    var running, lastFrame = +new Date;
-    var frame = 0;
-    var nextPoint = 0;
-    var pointDuration = 60;
-    
-    function loop( now ) {
-        // stop the loop if render returned false
-        if ( running !== false ) {
-            requestAnimationFrame( loop, element );
-            var deltaT = now - lastFrame;
-            // do not render frame when deltaT is too high
-            // skip a few frames, give deltaT a moment to smooth out
-            if (frame > 5) {
-                if ( deltaT < 160 ) {
-                    running = render( deltaT );
-                }
-            }
-            lastFrame = now;
-            frame++;
-        }
-    }
-    loop( lastFrame );
-}
 
 function load(name) {
     var xhr = new XMLHttpRequest();
     xhr.overrideMimeType("text/plain; charset=x-user-defined");
         
     xhr.onload = function(e) {
-        //console.log('loading world');
         if (world) world = null;
         var arraybuffer = xhr.response;
         if (arraybuffer) {
@@ -171,9 +130,9 @@ function load(name) {
 </script>
 </head>
 
-<body style='background:#222'>
-    <div style='position:absolute;margin:auto;width:540px;height:400px;left:0;top:0;bottom:0;right:0'>
-        <div style='float:right;margin-right:-160px;width:150px;font:10px verdana;color:#fa0'>
+<body>
+    <div class='centered'>
+        <div class='status'>
             <div style='float:left'>
                 <div>Ammo:</div>
                 <div>Gems:</div>
